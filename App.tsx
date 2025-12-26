@@ -359,7 +359,7 @@ const App: React.FC = () => {
       {gameState === 'playing' && isMobileDevice && (
         <button
           onClick={handleNoMoves}
-          className="fixed bottom-4 right-4 z-40 bg-red-500/80 hover:bg-red-600/80 backdrop-blur-sm border-2 border-red-400/50 rounded-full w-12 h-12 flex items-center justify-center text-white text-xl shadow-lg transition-all active:scale-90"
+          className="fixed bottom-4 left-4 z-40 bg-red-500/80 hover:bg-red-600/80 backdrop-blur-sm border-2 border-red-400/50 rounded-full w-12 h-12 flex items-center justify-center text-white text-xl shadow-lg transition-all active:scale-90"
           title="测试无解法界面"
         >
           🧪
