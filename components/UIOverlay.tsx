@@ -160,6 +160,21 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ state, score, onStart, onR
               {t.gameOver.timeUp}
             </h1>
             
+            {/* 最终分数显示 */}
+            <div className="w-full mb-3">
+              <div className="flex items-center justify-center gap-1 mb-1.5">
+                <span className="text-xs animate-wiggle">🎯</span>
+                <p className="text-yellow-200 text-[10px] font-semibold">{t.gameOver.finalScore}</p>
+                <span className="text-xs animate-wiggle" style={{ animationDelay: '0.2s' }}>🎯</span>
+              </div>
+              <div className="bg-gradient-to-r from-yellow-500/30 via-orange-500/30 to-pink-500/30 border-2 border-yellow-400/40 rounded-xl p-3 backdrop-blur-sm w-full">
+                <div className="text-3xl sm:text-4xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300">
+                  {score.toLocaleString()}
+                </div>
+                <p className="text-yellow-200/80 text-[9px] mt-1.5 text-center">{t.gameOver.encouragement}</p>
+              </div>
+            </div>
+            
             {/* 按钮 */}
             <button 
               onClick={onRestart}
@@ -241,9 +256,24 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ state, score, onStart, onR
               <div className="text-2xl animate-float" style={{ animationDelay: '0.4s' }}>🐰</div>
             </div>
             
-            <h1 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 mb-3 animate-pulse text-center">
+            <h1 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 mb-2 animate-pulse text-center">
               {t.noMoves.title}
             </h1>
+            
+            {/* 最终分数显示 */}
+            <div className="w-full mb-3">
+              <div className="flex items-center justify-center gap-1 mb-1.5">
+                <span className="text-xs animate-wiggle">💔</span>
+                <p className="text-pink-200 text-[10px] font-semibold">{t.noMoves.gameOver}</p>
+                <span className="text-xs animate-wiggle" style={{ animationDelay: '0.2s' }}>💔</span>
+              </div>
+              <div className="bg-gradient-to-r from-pink-500/30 via-purple-500/30 to-blue-500/30 border-2 border-pink-400/40 rounded-xl p-3 backdrop-blur-sm w-full">
+                <div className="text-3xl sm:text-4xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300">
+                  {score.toLocaleString()}
+                </div>
+                <p className="text-pink-200/80 text-[9px] mt-1.5 text-center">{t.noMoves.encouragement}</p>
+              </div>
+            </div>
             
             {/* 按钮 */}
             <button 
