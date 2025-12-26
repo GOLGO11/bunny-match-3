@@ -9,7 +9,7 @@ export const LanguageSelector: React.FC = () => {
   const currentLang = availableLanguages[currentLanguage];
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 left-4 z-50">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-slate-700/80 hover:bg-slate-600/80 backdrop-blur-sm border border-slate-600 rounded-lg px-3 py-2 flex items-center gap-2 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105"
@@ -26,7 +26,7 @@ export const LanguageSelector: React.FC = () => {
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute bottom-full right-0 mb-2 bg-slate-800/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl p-2 min-w-[200px] z-50">
+          <div className="absolute bottom-full left-0 mb-2 bg-slate-800/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl p-2 min-w-[200px] z-50">
             <div className="text-xs text-slate-400 px-3 py-2 mb-1">Select Language</div>
             {Object.entries(availableLanguages).map(([code, lang]) => (
               <button
