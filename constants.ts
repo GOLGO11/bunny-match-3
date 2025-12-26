@@ -24,26 +24,26 @@ export interface LevelConfig {
 
 // 简单难度关卡配置
 export const EASY_LEVEL_CONFIGS: LevelConfig[] = [
-  { level: 1, minScore: 0, maxScore: 200000, timeLimit: 25 },      // 第一关：0-20万分，25秒
-  { level: 2, minScore: 200000, maxScore: 400000, timeLimit: 15 },  // 第二关：20-40万分，15秒
-  { level: 3, minScore: 400000, maxScore: 600000, timeLimit: 8 },    // 第三关：40-60万分，8秒
-  { level: 4, minScore: 600000, maxScore: null, timeLimit: 5 },     // 第四关：60万分以上，5秒
+  { level: 1, minScore: 0, maxScore: 200000, timeLimit: 20 },      // 第一关：0-20万分，20秒
+  { level: 2, minScore: 200000, maxScore: 400000, timeLimit: 16 },  // 第二关：20-40万分，16秒
+  { level: 3, minScore: 400000, maxScore: 600000, timeLimit: 12 },    // 第三关：40-60万分，12秒
+  { level: 4, minScore: 600000, maxScore: null, timeLimit: 8 },     // 第四关：60万分以上，8秒
 ];
 
 // 中等难度关卡配置
 export const MEDIUM_LEVEL_CONFIGS: LevelConfig[] = [
-  { level: 1, minScore: 0, maxScore: 80000, timeLimit: 25 },      // 第一关：0-8万分，25秒
-  { level: 2, minScore: 80000, maxScore: 160000, timeLimit: 15 },  // 第二关：8-16万分，15秒
-  { level: 3, minScore: 160000, maxScore: 240000, timeLimit: 8 },    // 第三关：16-24万分，8秒
-  { level: 4, minScore: 240000, maxScore: null, timeLimit: 5 },     // 最终关：24万分以上，5秒
+  { level: 1, minScore: 0, maxScore: 80000, timeLimit: 20 },      // 第一关：0-8万分，20秒
+  { level: 2, minScore: 80000, maxScore: 160000, timeLimit: 16 },  // 第二关：8-16万分，16秒
+  { level: 3, minScore: 160000, maxScore: 240000, timeLimit: 12 },    // 第三关：16-24万分，12秒
+  { level: 4, minScore: 240000, maxScore: null, timeLimit: 8 },     // 最终关：24万分以上，8秒
 ];
 
 // 困难难度关卡配置
 export const HARD_LEVEL_CONFIGS: LevelConfig[] = [
-  { level: 1, minScore: 0, maxScore: 20000, timeLimit: 25 },      // 第一关：0-2万分，25秒
-  { level: 2, minScore: 20000, maxScore: 40000, timeLimit: 15 },  // 第二关：2-4万分，15秒
-  { level: 3, minScore: 40000, maxScore: 60000, timeLimit: 8 },    // 第三关：4-6万分，8秒
-  { level: 4, minScore: 60000, maxScore: null, timeLimit: 5 },     // 最终关：6万分以上，5秒
+  { level: 1, minScore: 0, maxScore: 20000, timeLimit: 20 },      // 第一关：0-2万分，20秒
+  { level: 2, minScore: 20000, maxScore: 40000, timeLimit: 16 },  // 第二关：2-4万分，16秒
+  { level: 3, minScore: 40000, maxScore: 60000, timeLimit: 12 },    // 第三关：4-6万分，12秒
+  { level: 4, minScore: 60000, maxScore: null, timeLimit: 8 },     // 最终关：6万分以上，8秒
 ];
 
 // 根据难度获取关卡配置数组

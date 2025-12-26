@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { GameBoard } from './components/GameBoard';
 import { UIOverlay } from './components/UIOverlay';
-import { SettingsPanel } from './components/SettingsPanel';
 import { LandscapePrompt } from './components/LandscapePrompt';
 import { LevelPrompt } from './components/LevelPrompt';
 import { AdsManager } from './services/AdsManager';
@@ -33,6 +32,8 @@ const App: React.FC = () => {
   const [currentLevel, setCurrentLevel] = useState(1); // 当前关卡编号
   const [levelPromptConfig, setLevelPromptConfig] = useState<LevelConfig | null>(null); // 关卡提示配置
   const [isAssetsLoaded, setIsAssetsLoaded] = useState(false); // 资源是否已加载完成
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const adsManager = useRef(new AdsManager());
   const audioManager = useRef(new AudioManager());
 
@@ -41,6 +42,24 @@ const App: React.FC = () => {
     adsManager.current.init().then(() => {
       console.log(`[Platform] Initialized: ${adsManager.current.getPlatform()}`);
     });
+  }, []);
+
+  // 从 localStorage 读取设置
+  useEffect(() => {
+    const savedMusic = localStorage.getItem('game-music-enabled');
+    const savedSound = localStorage.getItem('game-sound-enabled');
+    
+    if (savedMusic !== null) {
+      const enabled = savedMusic === 'true';
+      setMusicEnabled(enabled);
+      audioManager.current.setMusicEnabled(enabled);
+    }
+    
+    if (savedSound !== null) {
+      const enabled = savedSound === 'true';
+      setSoundEnabled(enabled);
+      audioManager.current.setEnabled(enabled);
+    }
   }, []);
 
   const handleScoreUpdate = useCallback((newScore: number, currentCombo: number) => {
@@ -92,7 +111,9 @@ const App: React.FC = () => {
     if (selectedDifficulty) {
       setDifficulty(selectedDifficulty);
     }
-    setTimeRemaining(null);
+    // 初始化timeRemaining为第一关的时间限制，让血条一开始就显示
+    const firstLevelConfig = getLevelByScore(0, finalDifficulty);
+    setTimeRemaining(firstLevelConfig.timeLimit);
     setCurrentLevel(1); // 重置关卡
     setLevelPromptConfig(null); // 清除之前的提示
     setGameState('loading');
@@ -156,7 +177,9 @@ const App: React.FC = () => {
   const handleRestart = () => {
     setScore(0);
     setCombo(0);
-    setTimeRemaining(null);
+    // 初始化timeRemaining为第一关的时间限制，让血条一开始就显示
+    const firstLevelConfig = getLevelByScore(0, difficulty);
+    setTimeRemaining(firstLevelConfig.timeLimit);
     setCurrentLevel(1); // 重置关卡
     setLevelPromptConfig(null); // 清除之前的提示
     setIsAssetsLoaded(false); // 重置资源加载状态
@@ -193,6 +216,21 @@ const App: React.FC = () => {
     }
   };
 
+  // 设置相关处理函数
+  const handleMusicToggle = useCallback(() => {
+    const newValue = !musicEnabled;
+    setMusicEnabled(newValue);
+    audioManager.current.setMusicEnabled(newValue);
+    localStorage.setItem('game-music-enabled', String(newValue));
+  }, [musicEnabled]);
+
+  const handleSoundToggle = useCallback(() => {
+    const newValue = !soundEnabled;
+    setSoundEnabled(newValue);
+    audioManager.current.setEnabled(newValue);
+    localStorage.setItem('game-sound-enabled', String(newValue));
+  }, [soundEnabled]);
+
   const handlePause = useCallback(() => {
     setIsPaused(true);
     audioManager.current.pauseBackgroundMusic();
@@ -202,6 +240,14 @@ const App: React.FC = () => {
     setIsPaused(false);
     audioManager.current.resumeBackgroundMusic();
   }, []);
+
+  const handlePauseToggle = useCallback(() => {
+    if (isPaused) {
+      handleResume();
+    } else {
+      handlePause();
+    }
+  }, [isPaused, handlePause, handleResume]);
 
   // 开发模式：快捷键测试无解法界面（连按三下P键，PC端）
   useEffect(() => {
@@ -320,38 +366,75 @@ const App: React.FC = () => {
         </button>
       )}
 
-      {/* 设置面板 */}
-      <SettingsPanel
-        audioManager={audioManager.current}
-        onPause={handlePause}
-        onResume={handleResume}
-        isPaused={isPaused}
-        gameState={gameState}
-      />
-      
-      <div className={`main-game-container relative z-10 w-full h-full flex flex-col p-1 sm:p-2 md:p-4 box-border ${
+      <div className={`main-game-container relative z-10 w-full h-full flex ${isGamePlaying ? 'flex-row' : 'flex-col'} p-1 sm:p-2 md:p-4 box-border gap-2 sm:gap-3 md:gap-4 ${
         isGamePlaying ? 'max-w-5xl mx-auto' : 'max-w-md mx-auto'
       }`}>
-        {gameState !== 'start' && (
-          <header className="game-header flex items-center justify-center mb-2 sm:mb-4 px-2 sm:px-4 py-1 sm:py-2 gap-3 sm:gap-4 md:gap-6 bg-transparent rounded-lg">
-            {/* 得分 - 左侧 */}
-            <div className="flex flex-col min-w-0">
+        {/* 游戏区域 */}
+        <div className="relative flex-grow bg-transparent rounded-xl sm:rounded-2xl overflow-hidden min-h-0">
+          {gameState === 'playing' && (
+            <GameBoard 
+              onScoreUpdate={handleScoreUpdate} 
+              onGameOver={handleGameOver}
+              onNoMoves={handleNoMoves}
+              onTimeUp={handleTimeUp}
+              onTimeUpdate={handleTimeUpdate}
+              onLevelChange={handleLevelChange}
+              onAssetsLoaded={handleAssetsLoaded}
+              audioManager={audioManager.current}
+              currentScore={score}
+              difficulty={difficulty}
+              isPaused={isPaused}
+            />
+          )}
+          
+          <UIOverlay 
+            state={gameState} 
+            score={score}
+            onStart={handleStart}
+            onRestart={handleRestart}
+            onRewardedAd={handleRequestReward}
+            currentDifficulty={difficulty}
+          />
+        </div>
+
+        {/* 右侧UI信息栏 - 只在游戏进行时显示 */}
+        {gameState !== 'start' && isGamePlaying && (
+          <div className="flex flex-col items-end gap-3 sm:gap-4 md:gap-5 min-w-[120px] sm:min-w-[140px] md:min-w-[160px]">
+            {/* 第一排：得分 */}
+            <div className="flex flex-col items-end min-w-0">
               <span className="text-[10px] sm:text-xs cute-label text-pink-300 uppercase tracking-widest drop-shadow-lg">{t.game.score}</span>
               <span className="text-xl sm:text-2xl md:text-3xl cute-number text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] truncate" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,182,193,0.3)' }}>
                 {score.toLocaleString()}
               </span>
             </div>
             
-            {/* 血条倒计时 - 中间 */}
+            {/* 第二排：连击 */}
+            <div className="flex flex-col items-end min-w-0">
+              <span className="text-[10px] sm:text-xs cute-label text-yellow-300 uppercase tracking-widest drop-shadow-lg">{t.game.combo}</span>
+              <span 
+                className={`text-xl sm:text-2xl md:text-3xl cute-number transition-all drop-shadow-[0_3px_6px_rgba(0,0,0,0.9)] ${
+                  combo > 1 
+                    ? 'text-yellow-300 scale-110' 
+                    : 'text-yellow-400/70'
+                }`}
+                style={{ 
+                  textShadow: combo > 1 
+                    ? '3px 3px 6px rgba(0,0,0,0.9), 0 0 15px rgba(255,215,0,0.6), 0 0 25px rgba(255,215,0,0.4)' 
+                    : '2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,215,0,0.3)'
+                }}
+              >
+                x{combo}
+              </span>
+            </div>
+            
+            {/* 第三排：关卡+血条 */}
             {timeRemaining !== null ? (() => {
               const levelConfig = getLevelByScore(score, difficulty);
               const timeLimit = levelConfig.timeLimit;
               // 确保 timeRemaining 和 timeLimit 都是有效数字
               const percentage = timeLimit > 0 ? Math.max(0, Math.min(100, (timeRemaining / timeLimit) * 100)) : 0;
-              // 调试：输出血条宽度计算
-              console.log(`[App] Render: timeRemaining=${timeRemaining}, timeLimit=${timeLimit}, percentage=${percentage}%`);
               return (
-                <div className="flex flex-col items-center w-full max-w-[200px] flex-shrink-0 gap-1">
+                <div className="flex flex-col items-end w-full gap-1.5 sm:gap-2">
                   {/* 关卡显示 */}
                   <div className="flex items-center gap-1.5">
                     <span className="text-[9px] sm:text-[10px] cute-label text-purple-300 uppercase tracking-wider drop-shadow-lg">
@@ -382,54 +465,65 @@ const App: React.FC = () => {
                 </div>
               );
             })() : null}
-            
-            {/* 连击 - 右侧 */}
-            <div className="flex flex-col items-end min-w-0">
-              <span className="text-[10px] sm:text-xs cute-label text-yellow-300 uppercase tracking-widest drop-shadow-lg">{t.game.combo}</span>
-              <span 
-                className={`text-xl sm:text-2xl md:text-3xl cute-number transition-all drop-shadow-[0_3px_6px_rgba(0,0,0,0.9)] ${
-                  combo > 1 
-                    ? 'text-yellow-300 scale-110' 
-                    : 'text-yellow-400/70'
-                }`}
-                style={{ 
-                  textShadow: combo > 1 
-                    ? '3px 3px 6px rgba(0,0,0,0.9), 0 0 15px rgba(255,215,0,0.6), 0 0 25px rgba(255,215,0,0.4)' 
-                    : '2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,215,0,0.3)'
-                }}
-              >
-                x{combo}
-              </span>
-            </div>
-          </header>
-        )}
 
-        <div className="relative flex-grow bg-transparent rounded-xl sm:rounded-2xl overflow-hidden min-h-0">
-          {gameState === 'playing' && (
-            <GameBoard 
-              onScoreUpdate={handleScoreUpdate} 
-              onGameOver={handleGameOver}
-              onNoMoves={handleNoMoves}
-              onTimeUp={handleTimeUp}
-              onTimeUpdate={handleTimeUpdate}
-              onLevelChange={handleLevelChange}
-              onAssetsLoaded={handleAssetsLoaded}
-              audioManager={audioManager.current}
-              currentScore={score}
-              difficulty={difficulty}
-              isPaused={isPaused}
-            />
-          )}
-          
-          <UIOverlay 
-            state={gameState} 
-            score={score}
-            onStart={handleStart}
-            onRestart={handleRestart}
-            onRewardedAd={handleRequestReward}
-            currentDifficulty={difficulty}
-          />
-        </div>
+            {/* 设置按钮区域 - 放在血条下方 */}
+            <div className="flex flex-col items-end gap-2 sm:gap-2.5 w-full">
+              {/* 第一排：音乐按钮 */}
+              <button
+                onClick={handleMusicToggle}
+                className={`flex items-center justify-end gap-2 px-3 py-2 rounded-lg transition-all w-full ${
+                  musicEnabled
+                    ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/50'
+                    : 'bg-slate-700/50 hover:bg-slate-700/70 text-slate-400 border border-slate-600/50'
+                }`}
+                title={musicEnabled ? t.settings?.musicOn || '音乐: 开' : t.settings?.musicOff || '音乐: 关'}
+              >
+                <span className="text-base sm:text-lg">
+                  {musicEnabled ? '🎵' : '🔇'}
+                </span>
+                <span className="text-[10px] sm:text-xs font-semibold">
+                  {t.settings?.music || '音乐'}
+                </span>
+              </button>
+
+              {/* 第二排：音效按钮 */}
+              <button
+                onClick={handleSoundToggle}
+                className={`flex items-center justify-end gap-2 px-3 py-2 rounded-lg transition-all w-full ${
+                  soundEnabled
+                    ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/50'
+                    : 'bg-slate-700/50 hover:bg-slate-700/70 text-slate-400 border border-slate-600/50'
+                }`}
+                title={soundEnabled ? t.settings?.soundOn || '音效: 开' : t.settings?.soundOff || '音效: 关'}
+              >
+                <span className="text-base sm:text-lg">
+                  {soundEnabled ? '🔊' : '🔇'}
+                </span>
+                <span className="text-[10px] sm:text-xs font-semibold">
+                  {t.settings?.sound || '音效'}
+                </span>
+              </button>
+
+              {/* 第三排：暂停按钮 */}
+              <button
+                onClick={handlePauseToggle}
+                className={`flex items-center justify-end gap-2 px-3 py-2 rounded-lg transition-all w-full ${
+                  isPaused
+                    ? 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/50'
+                    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/50'
+                }`}
+                title={isPaused ? t.settings?.resume || '继续' : t.settings?.pause || '暂停'}
+              >
+                <span className="text-base sm:text-lg">
+                  {isPaused ? '▶️' : '⏸️'}
+                </span>
+                <span className="text-[10px] sm:text-xs font-semibold">
+                  {isPaused ? (t.settings?.resume || '继续') : (t.settings?.pause || '暂停')}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

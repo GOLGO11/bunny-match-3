@@ -210,6 +210,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onScoreUpdate, onGameOver,
       // 更新倒计时显示（所有难度）
       let lastTimerStarted = false;
       let lastReportedTime: number | null = null;
+      let initialTimeReported = false;
       const updateTimer = () => {
         // 使用最新的引擎引用
         const currentEngine = engineRef.current;
@@ -231,8 +232,17 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onScoreUpdate, onGameOver,
             }
             lastReportedTime = remaining;
             lastTimerStarted = true;
+            initialTimeReported = true;
+          } else if (!initialTimeReported) {
+            // 如果计时器未启动，但还没有报告过初始时间，则报告一次初始时间
+            // 这样血条可以在游戏开始时立即显示
+            if (timeUpdateRef.current) {
+              timeUpdateRef.current(remaining);
+              initialTimeReported = true;
+              console.log(`[GameBoard] Initial time reported: ${remaining}`);
+            }
           }
-          // 注意：如果计时器未启动，不更新（保持上一次的值，这样血条不会消失）
+          // 注意：如果计时器未启动且已经报告过初始时间，不更新（保持上一次的值，这样血条不会消失）
         }
       };
       // 使用更频繁的更新间隔，确保能及时反映时间变化
@@ -369,4 +379,5 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onScoreUpdate, onGameOver,
     </div>
   );
 };
+
 
