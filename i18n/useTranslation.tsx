@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Language, detectLanguage, setLanguage, getTranslation, languages, getUserSelectedLanguage } from './index';
+import { Language, detectLanguage, setLanguage, getTranslation, languages } from './index';
 
 interface TranslationContextType {
   t: any;
@@ -12,20 +12,22 @@ const TranslationContext = createContext<TranslationContextType | undefined>(und
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
   const [currentLanguage, setCurrentLanguageState] = useState<Language>(() => {
+    // 清理localStorage中可能存在的旧语言设置（不再使用手动选择）
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('game-language');
+      } catch (e) {
+        // 忽略错误
+      }
+    }
+    
     const detected = detectLanguage();
     console.log(`[i18n] 初始化语言检测: ${detected} (navigator.language=${navigator.language}, navigator.languages=${navigator.languages?.join(', ')})`);
     return detected;
   });
 
-  // 检测并更新语言（仅在用户没有手动选择时）
+  // 检测并更新语言
   const updateLanguage = useCallback(() => {
-    // 如果用户已经手动选择了语言，不要自动更新
-    const userSelected = getUserSelectedLanguage();
-    if (userSelected) {
-      console.log(`[i18n] 跳过自动检测，用户已手动选择语言: ${userSelected}`);
-      return;
-    }
-    
     const detectedLang = detectLanguage();
     console.log(`[i18n] 重新检测语言: ${detectedLang}`);
     setCurrentLanguageState(prevLang => {

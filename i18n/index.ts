@@ -40,48 +40,19 @@ const translations: Record<Language, any> = {
 // 导出支持的语言列表供外部使用
 export const supportedLanguages: Language[] = ['en', 'zh', 'ja', 'ko', 'fr', 'de', 'es', 'ru', 'it', 'pt'];
 
-const LANGUAGE_STORAGE_KEY = 'game-language';
-
 export function getTranslation(lang: Language) {
   return translations[lang] || translations.en;
 }
 
-export function getUserSelectedLanguage(): Language | null {
-  // 获取用户手动选择的语言
-  if (typeof window === 'undefined') return null;
-  try {
-    const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (saved && (supportedLanguages as string[]).includes(saved)) {
-      return saved as Language;
-    }
-  } catch (e) {
-    console.warn('[i18n] 无法从 localStorage 读取语言:', e);
-  }
-  return null;
-}
-
 export function setLanguage(lang: Language) {
-  // 保存用户手动选择的语言到 localStorage
-  if (typeof window !== 'undefined') {
-    try {
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
-    } catch (e) {
-      console.warn('[i18n] 无法保存语言到 localStorage:', e);
-    }
-  }
+  // 这个方法保留是为了兼容性，但不再执行任何操作
+  // 不再保存到localStorage，仅使用自动检测
 }
 
 export function detectLanguage(): Language {
   if (typeof window === 'undefined') return 'en';
   
-  // 优先检查用户手动选择的语言
-  const userSelected = getUserSelectedLanguage();
-  if (userSelected) {
-    console.log(`[i18n] 使用用户手动选择的语言: ${userSelected}`);
-    return userSelected;
-  }
-  
-  // 如果没有用户选择，则自动检测系统语言
+  // 自动检测浏览器语言
   // 优先检查 navigator.languages 数组（按优先级排序的语言列表）
   // 这个数组通常包含系统语言和浏览器语言设置
   const languages = navigator.languages || [navigator.language];
@@ -107,7 +78,7 @@ export function detectLanguage(): Language {
     return detectedLang;
   }
   
-  // 默认英语
+  // 默认英语（如果浏览器语言不在支持列表中）
   console.log(`[i18n] 未检测到支持的语言，使用默认: en (navigator.language=${navigator.language}, navigator.languages=${languages.join(', ')})`);
   return 'en';
 }
