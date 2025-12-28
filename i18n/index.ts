@@ -53,33 +53,39 @@ export function detectLanguage(): Language {
   if (typeof window === 'undefined') return 'en';
   
   // 自动检测浏览器语言
-  // 优先检查 navigator.languages 数组（按优先级排序的语言列表）
-  // 这个数组通常包含系统语言和浏览器语言设置
-  const languages = navigator.languages || [navigator.language];
+  // navigator.languages 数组按优先级排序，第一个通常是用户的首选语言
+  const languagesArray = navigator.languages && navigator.languages.length > 0 
+    ? navigator.languages 
+    : [navigator.language];
   
-  // 遍历语言列表，找到第一个支持的语言
-  for (const lang of languages) {
-    const langCode = lang.toLowerCase().split('-')[0];
+  const primaryLanguage = navigator.language || 'en';
+  
+  console.log(`[i18n] 开始检测语言 - navigator.language: "${primaryLanguage}", navigator.languages: [${languagesArray.join(', ')}]`);
+  
+  // 优先检查 navigator.language（用户的首选语言）
+  const primaryLangCode = primaryLanguage.toLowerCase().split('-')[0].trim();
+  if (primaryLangCode && supportedLanguages.includes(primaryLangCode as Language)) {
+    const detectedLang = primaryLangCode as Language;
+    console.log(`[i18n] ✓ 检测到首选语言: ${primaryLanguage} -> ${detectedLang}`);
+    return detectedLang;
+  }
+  
+  // 然后检查 navigator.languages 数组中的所有语言
+  for (let i = 0; i < languagesArray.length; i++) {
+    const lang = languagesArray[i];
+    const langCode = lang.toLowerCase().split('-')[0].trim();
+    console.log(`[i18n] 检查语言[${i}]: "${lang}" -> 提取代码: "${langCode}"`);
+    
     // 使用更严格的检查：确保语言代码在支持的语言列表中
-    if (supportedLanguages.includes(langCode as Language)) {
+    if (langCode && supportedLanguages.includes(langCode as Language)) {
       const detectedLang = langCode as Language;
-      console.log(`[i18n] 检测到语言: ${lang} -> ${detectedLang}`);
+      console.log(`[i18n] ✓ 检测到支持的语言: ${lang} -> ${detectedLang}`);
       return detectedLang;
     }
   }
   
-  // 如果没有匹配的，尝试 navigator.language
-  const browserLang = navigator.language.toLowerCase();
-  const langCode = browserLang.split('-')[0];
-  
-  if (supportedLanguages.includes(langCode as Language)) {
-    const detectedLang = langCode as Language;
-    console.log(`[i18n] 使用 navigator.language: ${navigator.language} -> ${detectedLang}`);
-    return detectedLang;
-  }
-  
   // 默认英语（如果浏览器语言不在支持列表中）
-  console.log(`[i18n] 未检测到支持的语言，使用默认: en (navigator.language=${navigator.language}, navigator.languages=${languages.join(', ')})`);
+  console.log(`[i18n] ✗ 未检测到支持的语言，使用默认: en (navigator.language="${primaryLanguage}", navigator.languages=[${languagesArray.join(', ')}])`);
   return 'en';
 }
 
