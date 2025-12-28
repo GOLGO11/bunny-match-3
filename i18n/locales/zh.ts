@@ -83,6 +83,10 @@ export default {
     timeLimit: "时间限制",
     description: "加油！继续努力！",
     scoreRange: "分数范围"
+  },
+  
+  languageSelector: {
+    selectLanguage: "选择语言"
   }
 };
 

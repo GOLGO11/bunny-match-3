@@ -94,6 +94,11 @@ export default {
     timeLimit: "Time Limit",
     description: "Keep it up! You're doing great!",
     scoreRange: "Score Range"
+  },
+  
+  // 语言选择器
+  languageSelector: {
+    selectLanguage: "Select Language"
   }
 };
 

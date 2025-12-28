@@ -44,13 +44,30 @@ export function getTranslation(lang: Language) {
 export function detectLanguage(): Language {
   if (typeof window === 'undefined') return 'en';
   
-  // 自动检测浏览器系统语言
+  // 优先检查 navigator.languages 数组（按优先级排序的语言列表）
+  // 这个数组通常包含系统语言和浏览器语言设置
+  const languages = navigator.languages || [navigator.language];
+  
+  // 遍历语言列表，找到第一个支持的语言
+  for (const lang of languages) {
+    const langCode = lang.toLowerCase().split('-')[0] as Language;
+    if (langCode in translations) {
+      console.log(`[i18n] 检测到语言: ${lang} -> ${langCode}`);
+      return langCode;
+    }
+  }
+  
+  // 如果没有匹配的，尝试 navigator.language
   const browserLang = navigator.language.toLowerCase();
   const langCode = browserLang.split('-')[0] as Language;
   
-  if (langCode in translations) return langCode;
+  if (langCode in translations) {
+    console.log(`[i18n] 使用 navigator.language: ${navigator.language} -> ${langCode}`);
+    return langCode;
+  }
   
   // 默认英语
+  console.log(`[i18n] 未检测到支持的语言，使用默认: en (navigator.language=${navigator.language}, navigator.languages=${languages.join(', ')})`);
   return 'en';
 }
 

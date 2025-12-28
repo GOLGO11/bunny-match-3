@@ -83,6 +83,9 @@ export default {
     timeLimit: "Лимит Времени",
     description: "Продолжайте! У вас отлично получается!",
     scoreRange: "Диапазон Счета"
+  },
+  
+  languageSelector: {
+    selectLanguage: "Выбрать Язык"
   }
 };
-

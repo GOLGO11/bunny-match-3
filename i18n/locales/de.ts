@@ -83,6 +83,9 @@ export default {
     timeLimit: "Zeitlimit",
     description: "Weiter so! Du machst das großartig!",
     scoreRange: "Punktbereich"
+  },
+  
+  languageSelector: {
+    selectLanguage: "Sprache Auswählen"
   }
 };
-

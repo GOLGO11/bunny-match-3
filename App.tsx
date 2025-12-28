@@ -287,21 +287,8 @@ const App: React.FC = () => {
   // 判断是否为游戏进行中（需要横屏）
   const isGamePlaying = gameState === 'playing' || gameState === 'loading';
   
-  // 检测是否为移动设备（用于显示测试按钮）
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
   // 检测是否为横屏（用于显示关卡提示）
   const [isLandscape, setIsLandscape] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                      (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
-      setIsMobileDevice(isMobile);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
   
   // 检测横屏/竖屏
   useEffect(() => {
@@ -355,16 +342,6 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* 开发模式：移动端测试无解法按钮（仅在移动端游戏进行中时显示） */}
-      {gameState === 'playing' && isMobileDevice && (
-        <button
-          onClick={handleNoMoves}
-          className="fixed bottom-4 left-4 z-40 bg-red-500/80 hover:bg-red-600/80 backdrop-blur-sm border-2 border-red-400/50 rounded-full w-12 h-12 flex items-center justify-center text-white text-xl shadow-lg transition-all active:scale-90"
-          title="测试无解法界面"
-        >
-          🧪
-        </button>
-      )}
 
       <div className={`main-game-container relative z-10 w-full h-full flex ${isGamePlaying ? 'flex-row' : 'flex-col'} p-1 sm:p-2 md:p-4 box-border gap-2 sm:gap-3 md:gap-4 ${
         isGamePlaying ? 'max-w-5xl mx-auto' : 'max-w-md mx-auto'

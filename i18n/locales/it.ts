@@ -83,6 +83,9 @@ export default {
     timeLimit: "Limite di Tempo",
     description: "Continua così! Stai andando alla grande!",
     scoreRange: "Intervallo Punteggio"
+  },
+  
+  languageSelector: {
+    selectLanguage: "Seleziona Lingua"
   }
 };
-

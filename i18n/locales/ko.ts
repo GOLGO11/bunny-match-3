@@ -83,6 +83,9 @@ export default {
     timeLimit: "시간 제한",
     description: "화이팅! 정말 잘하고 있어요!",
     scoreRange: "점수 범위"
+  },
+  
+  languageSelector: {
+    selectLanguage: "언어 선택"
   }
 };
-
