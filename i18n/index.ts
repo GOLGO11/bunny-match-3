@@ -53,39 +53,22 @@ export function detectLanguage(): Language {
   if (typeof window === 'undefined') return 'en';
   
   // 自动检测浏览器语言
-  // navigator.languages 数组按优先级排序，第一个通常是用户的首选语言
-  const languagesArray = navigator.languages && navigator.languages.length > 0 
-    ? navigator.languages 
-    : [navigator.language];
-  
+  // 只检查 navigator.language（用户的首选语言），不遍历整个 languages 数组
+  // 这样可以避免匹配到次要语言（如中文）当主要语言不在支持列表中时
   const primaryLanguage = navigator.language || 'en';
-  
-  console.log(`[i18n] 开始检测语言 - navigator.language: "${primaryLanguage}", navigator.languages: [${languagesArray.join(', ')}]`);
-  
-  // 优先检查 navigator.language（用户的首选语言）
   const primaryLangCode = primaryLanguage.toLowerCase().split('-')[0].trim();
+  
+  console.log(`[i18n] 检测语言 - navigator.language: "${primaryLanguage}" -> 代码: "${primaryLangCode}"`);
+  
+  // 只检查主要语言，如果在支持列表中则使用，否则默认英语
   if (primaryLangCode && supportedLanguages.includes(primaryLangCode as Language)) {
     const detectedLang = primaryLangCode as Language;
-    console.log(`[i18n] ✓ 检测到首选语言: ${primaryLanguage} -> ${detectedLang}`);
+    console.log(`[i18n] ✓ 检测到支持的语言: ${primaryLanguage} -> ${detectedLang}`);
     return detectedLang;
   }
   
-  // 然后检查 navigator.languages 数组中的所有语言
-  for (let i = 0; i < languagesArray.length; i++) {
-    const lang = languagesArray[i];
-    const langCode = lang.toLowerCase().split('-')[0].trim();
-    console.log(`[i18n] 检查语言[${i}]: "${lang}" -> 提取代码: "${langCode}"`);
-    
-    // 使用更严格的检查：确保语言代码在支持的语言列表中
-    if (langCode && supportedLanguages.includes(langCode as Language)) {
-      const detectedLang = langCode as Language;
-      console.log(`[i18n] ✓ 检测到支持的语言: ${lang} -> ${detectedLang}`);
-      return detectedLang;
-    }
-  }
-  
-  // 默认英语（如果浏览器语言不在支持列表中）
-  console.log(`[i18n] ✗ 未检测到支持的语言，使用默认: en (navigator.language="${primaryLanguage}", navigator.languages=[${languagesArray.join(', ')}])`);
+  // 默认英语（如果主要语言不在支持列表中）
+  console.log(`[i18n] ✗ 主要语言不在支持列表中，使用默认: en (navigator.language="${primaryLanguage}")`);
   return 'en';
 }
 
