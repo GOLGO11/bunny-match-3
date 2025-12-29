@@ -30,6 +30,12 @@ export class AdsManager {
    * Shows a full-screen loading ad before the game begins.
    */
   async showLoadingAd(): Promise<void> {
+    // Telegram Games 不允许广告，直接跳过
+    if (this.platformManager.isPlatform(Platform.TELEGRAM)) {
+      console.log("[ADS] Telegram platform detected, skipping ads");
+      return new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
     const adapter = this.platformManager.getAdapter();
     const shown = await adapter.showAd('loading');
     
@@ -44,6 +50,12 @@ export class AdsManager {
    * Shows an interstitial ad between levels or on game over.
    */
   async showInterstitialAd(): Promise<void> {
+    // Telegram Games 不允许广告，直接跳过
+    if (this.platformManager.isPlatform(Platform.TELEGRAM)) {
+      console.log("[ADS] Telegram platform detected, skipping ads");
+      return;
+    }
+    
     const adapter = this.platformManager.getAdapter();
     await adapter.showAd('interstitial');
   }
@@ -53,6 +65,12 @@ export class AdsManager {
    * @returns Promise<boolean> - True if the user watched the full ad.
    */
   async showRewardedAd(): Promise<boolean> {
+    // Telegram Games 不允许广告，直接返回false
+    if (this.platformManager.isPlatform(Platform.TELEGRAM)) {
+      console.log("[ADS] Telegram platform detected, skipping ads");
+      return false;
+    }
+    
     const adapter = this.platformManager.getAdapter();
     const result = await adapter.showAd('rewarded');
     

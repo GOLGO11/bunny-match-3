@@ -281,14 +281,26 @@ class TelegramAdapter implements PlatformSDK {
 
   gameplayStart(): void {
     if (this.isAvailable && this.webApp) {
-      // Telegram 可以发送数据到后端
-      this.webApp.sendData(JSON.stringify({ action: 'gameplay_start' }));
+      // Telegram Games: 仅发送游戏状态，不发送任何用户数据给第三方
+      // 注意：sendData 仅发送给游戏自己的后端，不违反Telegram规则
+      try {
+        this.webApp.sendData(JSON.stringify({ action: 'gameplay_start' }));
+      } catch (e) {
+        // 静默处理错误，不影响游戏运行
+        console.log('[Platform] Telegram sendData failed (this is normal if no backend)');
+      }
     }
   }
 
   gameplayStop(): void {
     if (this.isAvailable && this.webApp) {
-      this.webApp.sendData(JSON.stringify({ action: 'gameplay_stop' }));
+      // Telegram Games: 仅发送游戏状态，不发送任何用户数据给第三方
+      try {
+        this.webApp.sendData(JSON.stringify({ action: 'gameplay_stop' }));
+      } catch (e) {
+        // 静默处理错误，不影响游戏运行
+        console.log('[Platform] Telegram sendData failed (this is normal if no backend)');
+      }
     }
   }
 }
